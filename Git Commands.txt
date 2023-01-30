@@ -1,0 +1,12 @@
+git init 
+git add somefile OR git add .
+git commit -m "initial commit"
+git status 
+git log 
+
+git remote add origin https://github.com/adinashby/Test.git
+git branch -M main
+git push -u origin main
+
+git pull
+git push
