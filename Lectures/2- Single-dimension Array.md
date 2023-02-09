@@ -122,7 +122,7 @@ Usually we can use the copy constructor (or `clone()`) to implement deep copy. F
 int[] nums1 = {1, 2, 3};
 
 // copy the entire array
-int[] nums2 = Arrays.copyOf(nums2, nums2.length);     // {1, 2, 3};
+int[] nums2 = Arrays.copyOf(nums1, nums1.length);     // {1, 2, 3};
 
 // copy part of an array
 int[] nums3 = Arrays.copyOf(nums1, 2);      		 // {1, 2};
@@ -149,14 +149,14 @@ public class CopyExample {
 
     public CopyExample(int[] values) {
         // Shallow Copy
-        //this.data = values;
+        this.data = values;
 
         // Deep Copy
-        data = new int[values.length];
+        // data = new int[values.length];
 
-        for(int i = 0; i < data.length; i++) {
-            data[i] = values[i];
-        }
+        // for(int i = 0; i < data.length; i++) {
+        //     data[i] = values[i];
+        // }
     }
 
     public void showData() {
@@ -183,7 +183,7 @@ public static void main(String[] args) {
 // Sort an array
 int[] nums = {1, 6, 3, -2, 5, 0};
 // Arrays.sort() is a void method, it direclty modifies the original array instead of create a new array. If you want to keep the original array, you should create a copy of the array manually before sorting it.
-int[] numsCopy = Arrays.copyOf(nums12, nums12.length);
+int[] numsCopy = Arrays.copyOf(nums, nums.length);
 
 // sort the entire array, ascending
 Arrays.sort(numsCopy);
