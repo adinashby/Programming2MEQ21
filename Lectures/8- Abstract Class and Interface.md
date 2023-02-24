@@ -12,7 +12,7 @@
 
   ```java
   // Example of abstract method
-  public abstract calcArea();
+  public abstract double calcArea();
   ```
 
   
