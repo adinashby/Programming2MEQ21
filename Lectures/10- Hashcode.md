@@ -1,4 +1,4 @@
-# HashCode
+# HashCode (Optional)
 
 ## 1. Set
 
