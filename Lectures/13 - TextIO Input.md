@@ -1,0 +1,269 @@
+# TextIO: Input
+
+## 1. What Is TextIO
+
+If a programmer want to communicate with computer, she/he can use console. However, if you want to send data to your colleague who is not a programmer, she/he may send you data in excel or a text file, in this case, you need read data from the file, then process the data, and in the end write it to another excel file or a text file. To read and write data from external text files is called Java `TextIO`, where:
+
+- `I` stands for `input`: reading data from an external file to Java
+- `O` stands for `output`: writing data from Java to an external file
+
+Also, we should understand that the extension of a file have nothing to do with the context (data) of a file. For example, if we have `1 2 3` in a file, then no matter the file is called `data.txt` or `data.yi` or just `data` with no extension, the data are the same. The extension only will tell the OS that the data are suppose to follow a specific structure, so the OS can open it with a specific application.
+
+When we talk about `TextIO`, it means reading and writing text type context (data), not image, not movie or zip, it is not necessary the file should be a `.txt` file.
+
+### 1.1 csv File
+
+Most of the time when we want to read and write data from an external file, it could be an `Excel` file. A classic `Excel` file has an extension of `.xlsx`. The same as `Word` file with extension of `.docx`, `.xlsx` file is not a standard text file, it contains many other information such as the background color, the font family, and image etc. Java has methods to read from / write to a `.xlsx` file, however, that will not be considered as pure TextIO.
+
+The file extension `.csv` file can also be opened by Excel, however, the data store inside are text based. `csv` stands for `comma-seperated values`, so in a `.csv` file, data in different columns are separated by `,`. a `.xlsx` file cannot be directly opened by a text editor and also cannot be read and write by using Java TextIO, however, a `.csv` file can be opened by a text editor and also can be read and write by using Java TextIO.
+
+If you have an `.xlsx`, you can open it with Excel, and the simply save it as a `.csv` file, and also the other way around.
+
+## 2. TextIO VS ConsoleIO
+
+In Programming 1 we have learned how to read and write data through the console:
+
+```java
+// output:
+	System.out.print();
+    System.out.println();
+    System.out.printf();
+
+//input:
+    Scanner console = new Scanner(System.in);
+
+	String str = console.next();
+	String str2 = nextLine();
+	int num = nextInt();
+	double num2 = nextDouble();
+```
+
+Console IO is reading and writing through the console, and TextIO is reading and writing through an external file. Even though the source and the destination are different, the methods are shared. We also have to use `print()`, `println()` and `printf()` to output, and `next()`, `nextLine()`, `nextInt()`, `nextDouble()` to input.
+
+## 3 Absolute Path VS Relative Path
+
+Before we learn how to implement TextIO, we first need to know how to represent a path of a file. There are two ways to represent the path of a file:
+
+- `Absolute Path`: is a path starts from the `root of the Operating System (OS)`. `C:\Users\andre\Desktop\Programming2\Lecture\imgs\Chapter4\ExceptionHierarchy.png`, the absolute path does not care about the address of the describer.
+
+  - Pro: everyone can find the file with the absolute path, in the other word, the address is never ambiguous.
+  - Con: if the path of the file changed, it is impossible to find the file.
+
+- `Relative Path`: is a path starts from the path of the current file (describer)
+
+  `imgs\Chapter4\ExceptionHierarchy.png`, the relative path does care about the address of the describer.
+
+  - Pro: if the path of the file changed, it is possible to find the file (if the relationship between the current file and the target file does not change).
+  - Con: except the current, no file can find the file with the relative path, in the other word, the address is ambiguous.
+
+In computer science, relative path is frequently used. For example, if you want to develop a website, you may develop it on your local computer, which could be a Windows system machine, then once it is done, you have to transfer the code to a server to host the website, which usually uses Linux system. If you use absolute path in your code, then the server for sure cannot understand the path in your code. However, if the relative relationship between your files in the project remain the same, relative path between files will not be changed, and the Linux system can recognize them.
+
+## 4 Text Input
+
+### 4.1 Basic Syntax
+
+Generally there are 3 steps to read from a file:
+
+1. create a `File` object and link it with the file path
+
+   ```java
+   File file = new File(path);
+   ```
+
+2. create a `Scanner` object and link it with the previous `File` object, and in this step, you should use `try with resource` structure and create the `Scanner` object as the resource. The `try with resource` structure behaves the same as the regular `try-catch` structure, the only difference is that `try with resource` will release the resource defined between the `()`. And It is very important that you release the resource when you read a file. If not, Java will continue link with the external file even the reading is over.
+
+   ```java
+   try (Scanner input = new Scanner(file)) {		// try with resource
+       // code
+   }
+   catch (IOException e) {
+       System.out.print("File not found");
+   }
+   // once the try-catch structure is over, the input resource will be released
+   ```
+
+3. read data from the file. You can use `nextLine()`, `next()`, `nextInt()` or `nextDouble()` to read data from the file.
+
+   ```java
+   try (Scanner input = new Scanner(file)) {
+       String str = input.nextDouble();		// read a string
+       String str2 = input.next();				// read a string
+       int num = input.nextInt();				// read an int
+       double num2 = input.nextDouble();		// read a double
+   }
+   catch (IOException e) {
+       System.out.println(String.format("File %s does not exist", path));
+   }
+   ```
+
+Here is an example of a method to read a file. However, the return type and the body of the `try-catch` may different case by case.
+
+```java
+public static String readFile(String path) {
+    File file = new File(path);
+
+    String str = "";
+
+    try (Scanner input = new Scanner(file)) {
+        str = input.nextLine();
+    } catch (IOException e) {
+        System.out.println(String.format("File %s does not exist", path));
+    }
+
+    return str;
+}
+```
+
+### 4.2 Read Multi-column Data
+
+Previously we have leaned how to read one data from an external file. However, in reality, no one would just put one data in a file and ask the programmer to write a piece of code to process it. The file may contains more data, and programmers have to read them all to process.
+
+In this section we will see a more complicated situation, if the data contains a row. Assume the data (score of a student, separated by space) look like this:
+
+```markdown
+1 Adin Ashby 98
+```
+
+What we can do is to read the entire line and keep it in a String.
+
+```java
+public static void readFile(String path) {
+    File file = new File(path);
+
+    try (Scanner input = new Scanner(file)) {
+        String row = input.nextLine();			// read the entire row
+    } catch (IOException e) {
+        System.out.println(String.format("File %s does not exist", path));
+    }
+}
+```
+
+Once we have the entire line, we don't need to worry about the TextIO anymore, since the data is stored in row, and we only have to extract them from the `row`. We can use the `split()` method in the `String` class, which will chop a String into many substring, we have to indicate what symbol will be used to chop the string. Now the value of `row` is `1 Adin Ashby 98` , there are four part in the string, and separated by spaces. We can use `String[] strs = row.split(" ");` to split the row and keep the result in a String array.
+
+```java
+public static void readFile(String path) {
+    File file = new File(path);
+
+    try (Scanner input = new Scanner(file)) {
+        String row = input.nextLine();			// read the entire row
+        String[] strs = row.split(" ");			// extract each part
+    } catch (IOException e) {
+        System.out.println(String.format("File %s does not exist", path));
+    }
+}
+```
+
+Then we can use the index to get the value of each part and process the data depends on the requirement. For example if a class `Student` with data members `id`, `fname`, `lname` and `score`, and appropriate constructor exist, then we can use the following code to create an object of a student:
+
+```java
+public static Student readFile(String path) {
+    File file = new File(path);
+    Student stu = null;
+
+    try (Scanner input = new Scanner(file)) {
+        String row = input.nextLine();			// read the entire row
+        String[] strs = row.split(" ");			// extract each part
+        stu = new Student(strs[0], strs[1], strs[2], strs[3]);			// id, fname, lname, score
+    } catch (IOException e) {
+        System.out.println(String.format("File %s does not exist", path));
+    }
+
+    return str;
+}
+```
+
+### 4.3 Read Multi-row Data
+
+In other situation you may have a file with data that cross many rows, and one `nextLine()` would not be enough to read all data. And also, the file may get longer and longer, first have 100 rows, then 120 rows, and then 200 rows. You don't want to hard-code the number of rows, cause then you have to keep changing your code if the length of data changes.
+
+The right solution is to use a `boolean` method `hasNext()` in the `Scanner` class. the `hasNext()` method will check if the scanner has reached the end of the file or not. if `hasNext()` returns `false`, that means it has not reached the end yet, and there are more data to read, while if the `hasNext()` returns `true`, it means the scanner has reached the end of the file.
+
+We can use a `while` loop with `hasNext()` as condition, in the body we can read the data line by line, and once we reached the end of the file the reading will stop automatically. And we don't have to worry about how long the data is.
+
+The following code read numbers in a file and add them to an arraylist, if the data cannot be cast to an integer, a special value `-1` will be added.
+
+```java
+/* data
+	1
+	2a			// bad data, should be handle with a try-catch inside the loop
+	3
+	4
+	5
+ */
+public static ArrayList<Integer> readFile(String path) {
+    File file = new File(path);
+    ArrayList<Integer> nums = new ArrayList<>();
+
+    try (Scanner input = new Scanner(file)) {
+        while (input.hasNext()) {        // boolean method to check if the scanner reach the end of the file or not
+            try {
+                nums.add(Integer.parseInt(input.next()));
+            } catch (NumberFormatException e) {
+                nums.add(-1);			// if a data cannot be converted to an integer, add -1 instead
+            }
+        }
+    } catch (IOException e) {
+        System.out.println(String.format("File %s does not exist", path));
+    }
+
+    return nums;
+}
+```
+
+### 4.4 Read From A Table
+
+Most of your time, you data will not a be just a row or a column, but a table with multi rows and columns (like a matrix), and you need to read data from that table.
+
+To read data from a table, we need to combine the previous knowledge of reading multi-row data and reading multi-column data. More specifically, we should first use a loop to reach each row, and for each row, we can read the entire row, and the split it into different parts, and then process the data.
+
+Here is an example of reading student data and then return an arraylist of students as the result.
+
+```java
+/**
+ * Read data from StudentData.txt and store all information of students in
+ * an ArrayList.
+ *
+ * @param path the path of the file
+ * @return the arraylist of student that contains information of all
+ * students
+ */
+public static ArrayList<Student> readStudentData(String path) {
+    File file = new File(path);
+
+    ArrayList<Student> students = new ArrayList<>();
+
+    try (Scanner input = new Scanner(file)) {
+        input.nextLine();           // read the header, but not touch it
+
+        while (input.hasNext()) {           // read multi-row
+            String row = input.nextLine();
+            String[] data = row.split(" ");     // {"0001", "adin", "ashby", "registered", "98", "78"}
+
+            String id = data[0];
+            String fname = toTitleCase(data[1]);
+            String lname = toTitleCase(data[2]);
+            double score1;
+            double score2;
+            boolean registered = !data[3].toLowerCase().contains("un");
+            try {										// make sure the data can be casted to a double
+                score1 = Double.parseDouble(data[4]);
+            } catch (java.lang.NumberFormatException e) {
+                score1 = -1;
+            }
+            try {
+                score2 = Double.parseDouble(data[5]);
+            } catch (java.lang.NumberFormatException e) {
+                score2 = -1;
+            }
+            double[] scores = {score1, score2};
+
+            Student student = new Student(id, fname, lname, registered, scores);
+            students.add(student);						// add the new student to the arraylist
+        }
+    } catch (IOException e) {
+        System.out.println(String.format("File %s does not exist", path));
+    }
+
+    return students;
+}
+```
